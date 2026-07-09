@@ -91,7 +91,7 @@
       flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 15px; 
+      gap: 20px; 
       min-height: 0; 
     }
 
@@ -350,7 +350,7 @@
       // ADICIONADO "Semana:" antes de exibir o valor da data
       novoCard.innerHTML = `
         <button class="remove-card-btn no-print" onclick="this.closest('.card').remove()" title="Remover este card">✕</button>
-        <div class="card-title" contenteditable="true">Semana: ${dados.semana}</div>
+        <div class="card-title" contenteditable="true">Semana ${dados.semana}</div>
         <div class="card-grid">
           <div class="card-col">
             <div class="assignment-row"><strong contenteditable="true">Áudio e Vídeo</strong><span class="colon">:</span><span class="brother-name" contenteditable="true">${dados.audioVideo}</span></div>
