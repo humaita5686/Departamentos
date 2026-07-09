@@ -297,7 +297,7 @@
 
           // Extrai os dados com base no mapeamento configurado de forma segura
           const dadosCard = {
-            semana: col[MAPA_COLUNAS.semana] || "Nova Semana",
+            semana: col[MAPA_COLUNAS.semana] || "00/00 a 00/00",
             audioVideo: col[MAPA_COLUNAS.audioVideo] || "",
             palco: col[MAPA_COLUNAS.palco] || "",
             mic1: col[MAPA_COLUNAS.microfone1] || "",
@@ -328,7 +328,7 @@
 
     // Função inteligente: Trata quebra de linhas e detecta automaticamente o divisor do CSV (, ou ;)
     function processarCSV(texto) {
-      const linhas = texto.split(/\r?\n/);
+      const linhas = text = texto.split(/\r?\n/);
       
       const primeiraLinha = linhas[0] || "";
       const divisor = (primeiraLinha.split(';').length > primeiraLinha.split(',').length) ? ';' : ',';
@@ -347,9 +347,10 @@
       const novoCard = document.createElement('div');
       novoCard.className = 'card';
       
+      // ADICIONADO "Semana:" antes de exibir o valor da data
       novoCard.innerHTML = `
         <button class="remove-card-btn no-print" onclick="this.closest('.card').remove()" title="Remover este card">✕</button>
-        <div class="card-title" contenteditable="true">${dados.semana}</div>
+        <div class="card-title" contenteditable="true">Semana: ${dados.semana}</div>
         <div class="card-grid">
           <div class="card-col">
             <div class="assignment-row"><strong contenteditable="true">Áudio e Vídeo</strong><span class="colon">:</span><span class="brother-name" contenteditable="true">${dados.audioVideo}</span></div>
@@ -375,7 +376,7 @@
         alert("O limite sugerido para a folha A4 vertical é de até 6 cards para manter a leitura nítida.");
       }
       criarCardNaTela({
-        semana: "Nova Semana (Clique para Editar)", audioVideo: "Nome", palco: "Nome", mic1: "Nome", mic2: "Nome", presidencia: "Nome", leitor: "Nome", indInterno: "Nome", indExterno: "Nome"
+        semana: "00/00 a 00/00", audioVideo: "Nome", palco: "Nome", mic1: "Nome", mic2: "Nome", presidencia: "Nome", leitor: "Nome", indInterno: "Nome", indExterno: "Nome"
       });
     }
   </script>
