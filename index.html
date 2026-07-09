@@ -275,11 +275,13 @@
         // Limpa o container para colocar os novos cards
         container.innerHTML = '';
 
-        // Se a planilha estiver vazia ou mal estruturada
         if (linhas.length <= 1) {
           container.innerHTML = '<div class="loading-msg">Nenhum dado encontrado na planilha.</div>';
           return;
         }
+
+        // Contador para limitar a exibição em no máximo 4 cards
+        let cardsExibidos = 0;
 
         // Ignora a primeira linha (cabeçalho) e itera pelas linhas de dados
         for (let i = 1; i < linhas.length; i++) {
@@ -287,6 +289,11 @@
           
           // Pula se a linha inteira for inválida ou sem a coluna da semana
           if (!col || col.length === 0 || !col[MAPA_COLUNAS.semana]) continue;
+
+          // Se já renderizou 4 cards, interrompe o loop completamente
+          if (cardsExibidos >= 4) {
+            break;
+          }
 
           // Extrai os dados com base no mapeamento configurado de forma segura
           const dadosCard = {
@@ -302,17 +309,18 @@
           };
 
           criarCardNaTela(dadosCard);
+          
+          // Incrementa o contador de cards gerados com sucesso
+          cardsExibidos++;
         }
 
       } catch (erro) {
         console.error("Erro detalhado:", erro);
-        // Renderiza o erro real diretamente na tela para sabermos o culpado exato
         container.innerHTML = `
           <div class="loading-msg" style="color: red; text-align: left; max-width: 600px; margin: 20px auto; font-size: 16px; line-height: 1.5;">
             <strong>⚠️ Falha Crítica na Sincronização</strong><br><br>
             <strong>Detalhes do erro capturado:</strong><br>
             <code style="background: #fee2e2; padding: 4px 8px; border-radius: 4px; font-family: monospace; display: block; margin: 8px 0; word-break: break-all;">${erro.name}: ${erro.message}</code>
-            <p style="font-size: 14px; color: #555;">Suba essa alteração para o GitHub. Se a mensagem acima disser <em>"TypeError: Failed to fetch"</em>, o seu navegador atual está impedindo o GitHub de ler o Google (CORS/Privacidade). Se disser outra coisa, o texto da caixinha nos dará a resposta exata!</p>
           </div>
         `;
       }
@@ -322,12 +330,10 @@
     function processarCSV(texto) {
       const linhas = texto.split(/\r?\n/);
       
-      // Detecta se a planilha usa vírgula ou ponto e vírgula baseado na primeira linha
       const primeiraLinha = linhas[0] || "";
       const divisor = (primeiraLinha.split(';').length > primeiraLinha.split(',').length) ? ';' : ',';
 
       return linhas.map(linha => {
-        // Expressão regular dinâmica baseada no divisor detectado
         const regex = new RegExp(`${divisor}(?=(?:(?:[^"]*"){2})*[^"]*$)`);
         return linha.split(regex).map(celula => 
           celula ? celula.replace(/^"|"$/g, '').trim() : ""
