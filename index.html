@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Arranjo de Oradores</title>
+  <title>Designações de Departamentos</title>
   <!-- Importação da fonte Cabin -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,335 +18,340 @@
       padding: 0;
       background-color: #f0f2f5;
       display: flex;
-      justify-content: center;
+      flex-direction: column;
       align-items: center;
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
     }
+
+    /* Barra de ferramentas flutuante na tela (Não sai na impressão) */
+    .control-bar {
+      margin-top: 15px;
+      background: white;
+      padding: 10px 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      display: flex;
+      gap: 10px;
+    }
+    .add-card-btn, .sync-btn {
+      background-color: #85581A;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: 'Cabin', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+    .add-card-btn:hover, .sync-btn:hover {
+      background-color: #634113;
+    }
+    .sync-btn {
+      background-color: #2563eb;
+    }
+    .sync-btn:hover {
+      background-color: #1d4ed8;
+    }
+
     /* Dimensões rígidas da folha A4 */
     .a4-page {
       width: 210mm;
       height: 297mm;
       background-color: #ffffff;
-      padding:15mm;
+      padding: 10mm 15mm 15mm 18mm;
+      margin: 15px auto;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
       display: flex;
       flex-direction: column;
-      gap: 25px;
     }
-    /* Alinhamento do Título Principal com a linha preta abaixo */
+
+    /* Alinhamento do Título Principal */
     .title-container {
       text-align: center;
-      margin-bottom: 5px;
+      margin-bottom: 18px;
     }
     .title-container h1 {
-      font-size: 33px;
+      font-size: 35px;
       font-weight: 700;
       color: #000000;
       margin: 0;
       padding-bottom: 6px;
       display: inline-block;
-      border-bottom: 2px solid #000000;
+      border-bottom: 3px solid #000000;
       text-transform: uppercase;
       letter-spacing: 0px;
-      width: 95%;
+      width: 88%;
     }
-    /* Estrutura geral dos Cards */
+
+    /* Container que gerencia a distribuição vertical automática dos cards */
+    .cards-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 15px; 
+      min-height: 0; 
+    }
+
+    /* Estrutura dos Cards de Semana */
     .card {
-      border-radius: 35px;
-      padding: 22px 30px;
+      background-color: #fdf1d3; 
+      border-radius: 40px;
+      padding: 0px 10px 10px 10px;
       width: 100%;
+      border: 1px solid rgba(133, 88, 26, 0.15);
       position: relative;
-      border: 1px solid rgba(0, 0, 0, 0.12);
-      box-shadow: 0px 5px 10px 0px rgba(0, 0, 0, 0.2);
-       
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      flex: 1; 
+      transition: all 0.2s ease;
+      box-shadow: 5px 5px 8px 0px rgba(0, 0, 0, 0.3);
     }
-    /* Card 1: Informações de Cabeçalho */
-    .card-header {
-      background-color: #d6dbd7;
-      text-align: center;
-      font-size: 20px;
-      line-height: 1.6;
-      color: #000000;
-    }
-    .card-header div {
-      margin-bottom: 2px;
-    }
-    /* Títulos internos dos Cards */
+
+    /* Título da Semana interno do Card */
     .card-title {
       text-align: center;
-      font-size: 30px;
+      font-size: 35px;
       font-weight: 700;
-      text-transform: uppercase;
-      margin-top: 0;
-      margin-bottom: 22px;
-      letter-spacing: 0.5px;
-      color: #000000;
+      color: #634113; 
+      margin-top: 15px;
+      margin-bottom: 25px;
     }
-    /* Card 2: Receberemos (Azul) */
-    .card-receberemos {
-      background-color: #cee0e5;
+
+    /* Divisão em duas colunas principais de designações */
+    .card-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      column-gap: 30px;
+      row-gap: 6px;
+      padding: 0 25px; 
     }
-    /* Card 3: Enviaremos (Salmão) */
-    .card-enviaremos {
-      background-color: #e5bbb0;
-    }
-    /* Linhas de programação */
-    .schedule-item {
-      margin-bottom: 18px;
-      font-size: 18px;
-      position: relative;
-    }
-    .schedule-item:last-child {
-      margin-bottom: 0;
-    }
-    .item-row {
-      display: flex;
-      justify-content: space-between;
-      color: #000000;
-      margin-bottom: 3px;
-    }
-    .theme-container {
-      display: flex;
-      justify-content: space-between;
+
+    /* Alinhamento Avançado: Transforma a linha em um mini-grid de 3 partes */
+    .assignment-row {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr; /* Esquerda (Função), Centro (:), Direita (Nome) */
       align-items: center;
-    }
-    .item-theme {
-      margin-left: 13px;
-      color: #000000;
-      flex-grow: 1;
-    }
-    /* Cores dos temas */
-    .theme-text-blue {
-      color: #1a4f63;
-      font-weight: 600;
-    }
-    .theme-text-red {
-      color: #7a2014;
-      font-weight: 600;
+      font-size: 17px;
+      color: #3d2411;
+      line-height: 1.4;
     }
     
-    /* Botões interativos (Apenas na tela) */
-    .no-print {
-      display: inline-block;
-    }
-    .add-btn {
-      background-color: #2563eb;
-      color: white;
-      border: none;
-      padding: 6px 12px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-family: 'Cabin', sans-serif;
-      font-size: 13px;
+    /* 1. Função alinhada à esquerda */
+    .assignment-row strong {
+      color: #85581A; 
       font-weight: 600;
-      margin-top: 10px;
-      transition: background 0.2s;
+      text-align: right;
     }
-    .add-btn:hover {
-      background-color: #1d4ed8;
+    
+    /* 2. O ponto ":" cravado estático bem no centro */
+    .assignment-row .colon {
+      color: #85581A;
+      font-weight: 600;
+      padding: 0 3px 0 0;
+      text-align: center;
+      user-select: none; /* Impede seleção acidental */
     }
-    .remove-btn {
+    
+    /* 3. Nome dos irmãos alinhado à direita */
+    .assignment-row .brother-name {
+      text-align: left;
+    }
+
+    /* Espaçamento entre blocos específicos */
+    .space-below {
+      margin-bottom: 8px;
+    }
+
+    /* Botão de excluir card individual */
+    .remove-card-btn {
+      position: absolute;
+      top: 12px;
+      right: 15px;
       background: none;
       border: none;
       color: #b91c1c;
       cursor: pointer;
-      font-size: 14px;
-      padding: 0 5px;
-      margin-left: 10px;
-      opacity: 0.4;
+      font-size: 16px;
+      font-weight: bold;
+      opacity: 0.2;
       transition: opacity 0.2s;
     }
-    .remove-btn:hover {
+    .remove-card-btn:hover {
       opacity: 1;
     }
 
-    /* Feedback visual de edição */
+    /* Edição viva em tela */
     [contenteditable="true"]:focus {
-      outline: 1px dashed #2563eb;
-      background-color: rgba(255, 255, 255, 0.4);
-      border-radius: 4px;
+      outline: 1px dashed #85581A;
+      background-color: rgba(255, 255, 255, 0.6);
+      border-radius: 3px;
     }
-    
-    /* Configurações de Impressão (Esconde os botões e força o tamanho A4) */
+
+    /* Estado de carregamento */
+    .loading-msg {
+      text-align: center;
+      font-size: 18px;
+      color: #85581A;
+      padding: 40px;
+      font-weight: 500;
+    }
+
+    /* Configurações de Impressão */
+    .no-print {
+      display: inline-block;
+    }
     @media print {
       body {
         background-color: transparent;
       }
+      .control-bar, .no-print {
+        display: none !important;
+      }
       .a4-page {
         box-shadow: none;
-        padding: 20mm 15mm;
+        padding: 15mm 16mm;
         margin: 0;
         page-break-after: always;
-      }
-      .no-print {
-        display: none !important;
       }
     }
   </style>
 </head>
 <body>
 
+  <!-- Barra superior para controle em tela -->
+  <div class="control-bar no-print">
+    <button class="sync-btn" onclick="buscarDadosDaPlanilha()">🔄 Atualizar Planilha</button>
+    <button class="add-card-btn" onclick="adicionarNovaSemana()">+ Adicionar Card Manual</button>
+  </div>
+
   <div class="a4-page">
     
     <!-- Título Principal com Linha -->
     <div class="title-container">
-      <h1 contenteditable="true">ARRANJO DE ORADORES - Mês</h1>
+      <h1 contenteditable="true">DESIGNAÇÕES DE DEPARTAMENTOS</h1>
     </div>
 
-    <!-- Card de Informações Gerais (Cinza-Esverdeado) -->
-    <div class="card card-header">
-      <div contenteditable="true"><strong>Congregação:</strong> nome da congregação</div>
-      <div contenteditable="true"><strong>Endereço:</strong> endereço da congregação</div>
-      <div contenteditable="true"><strong>Horário:</strong> horário da reunião</div>
+    <!-- Área dos Cards Semanais (Gerados Dinamicamente) -->
+    <div class="cards-container" id="cards-container">
+      <div class="loading-msg">Carregando dados da planilha...</div>
     </div>
-
-    <!-- Card RECEBEREMOS (Azul) -->
-    <div class="card card-receberemos">
-      <div class="card-title" contenteditable="true">RECEBEREMOS</div>
-      
-      <div id="container-receberemos">
-        <div class="schedule-item">
-          <div class="item-row">
-            <div contenteditable="true"><strong>Orador:</strong> nome</div>
-            <div contenteditable="true"><strong>Data:</strong> data</div>
-          </div>
-          <div class="theme-container">
-            <div class="item-theme" contenteditable="true">
-              <strong>Tema:</strong> <span class="theme-text-blue">tema do discurso</span>
-            </div>
-            <button class="remove-btn no-print" onclick="this.closest('.schedule-item').remove()" title="Remover semana">✕</button>
-          </div>
-        </div>
-
-        <div class="schedule-item">
-          <div class="item-row">
-            <div contenteditable="true"><strong>Orador:</strong> nome</div>
-            <div contenteditable="true"><strong>Data:</strong> data</div>
-          </div>
-          <div class="theme-container">
-            <div class="item-theme" contenteditable="true">
-              <strong>Tema:</strong> <span class="theme-text-blue">tema</span>
-            </div>
-            <button class="remove-btn no-print" onclick="this.closest('.schedule-item').remove()" title="Remover semana">✕</button>
-          </div>
-        </div>
-
-        <div class="schedule-item">
-          <div class="item-row">
-            <div contenteditable="true"><strong>Orador:</strong> nome</div>
-            <div contenteditable="true"><strong>Data:</strong> data</div>
-          </div>
-          <div class="theme-container">
-            <div class="item-theme" contenteditable="true">
-              <strong>Tema:</strong> <span class="theme-text-blue">tema</span>
-            </div>
-            <button class="remove-btn no-print" onclick="this.closest('.schedule-item').remove()" title="Remover semana">✕</button>
-          </div>
-        </div>
-
-        <div class="schedule-item">
-          <div class="item-row">
-            <div contenteditable="true"><strong>Orador:</strong> nome</div>
-            <div contenteditable="true"><strong>Data:</strong> 31 de Mai</div>
-          </div>
-          <div class="theme-container">
-            <div class="item-theme" contenteditable="true">
-              <strong>Tema:</strong> <span class="theme-text-blue">tema do discurso</span>
-            </div>
-            <button class="remove-btn no-print" onclick="this.closest('.schedule-item').remove()" title="Remover semana">✕</button>
-          </div>
-        </div>
-      </div>
-      
-      <button class="add-btn no-print" onclick="adicionarSemana('container-receberemos', 'blue')">+ Adicionar Semana</button>
-    </div>
-
-    <!-- Card ENVIAREMOS (Salmão) -->
-    <div class="card card-enviaremos">
-      <div class="card-title" contenteditable="true">ENVIAREMOS</div>
-      
-      <div id="container-enviaremos">
-        <div class="schedule-item">
-          <div class="item-row">
-            <div contenteditable="true"><strong>Orador:</strong> Ricardo Ribeiro</div>
-            <div contenteditable="true"><strong>Data:</strong> 10 de Mai</div>
-          </div>
-          <div class="theme-container">
-            <div class="item-theme" contenteditable="true">
-              <strong>Tema:</strong> <span class="theme-text-red">Mantenha a identidade cristã! (160)</span>
-            </div>
-            <button class="remove-btn no-print" onclick="this.closest('.schedule-item').remove()" title="Remover semana">✕</button>
-          </div>
-        </div>
-
-        <div class="schedule-item">
-          <div class="item-row">
-            <div contenteditable="true"><strong>Orador:</strong> Bruno Arita</div>
-            <div contenteditable="true"><strong>Data:</strong> 17 de Mai</div>
-          </div>
-          <div class="theme-container">
-            <div class="item-theme" contenteditable="true">
-              <strong>Tema:</strong> <span class="theme-text-red">Será que a vida é só isso? (36)</span>
-            </div>
-            <button class="remove-btn no-print" onclick="this.closest('.schedule-item').remove()" title="Remover semana">✕</button>
-          </div>
-        </div>
-
-        <div class="schedule-item">
-          <div class="item-row">
-            <div contenteditable="true"><strong>Orador:</strong> Renato Figueiredo</div>
-            <div contenteditable="true"><strong>Data:</strong> 24 de Mai</div>
-          </div>
-          <div class="theme-container">
-            <div class="item-theme" contenteditable="true">
-              <strong>Tema:</strong> <span class="theme-text-red">Você pode ter uma família feliz! (05)</span>
-            </div>
-            <button class="remove-btn no-print" onclick="this.closest('.schedule-item').remove()" title="Remover semana">✕</button>
-          </div>
-        </div>
-
-        <div class="schedule-item">
-          <div class="item-row">
-            <div contenteditable="true"><strong>Orador:</strong> Bruno Leonardo</div>
-            <div contenteditable="true"><strong>Data:</strong> 31 de Mai</div>
-          </div>
-          <div class="theme-container">
-            <div class="item-theme" contenteditable="true">
-              <strong>Tema:</strong> <span class="theme-text-red">Verdadeira fé – O que é e como mostrar (166)</span>
-            </div>
-            <button class="remove-btn no-print" onclick="this.closest('.schedule-item').remove()" title="Remover semana">✕</button>
-          </div>
-        </div>
-      </div>
-      
-      <button class="add-btn no-print" onclick="adicionarSemana('container-enviaremos', 'red')" style="background-color: #b91c1c;">+ Adicionar Semana</button>
-    </div>
-
   </div>
 
-  <!-- Script para adicionar dinamicamente novas semanas -->
   <script>
-    function adicionarSemana(containerId, tipoCor) {
-      const container = document.getElementById(containerId);
-      const novaSemana = document.createElement('div');
-      novaSemana.className = 'schedule-item';
+    // URL do CSV da sua planilha pública do Google Drive
+    const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSBuS_Qe2LkVH7QEPbSvoFn50e7I71Waljbuk8b2UR1wxGkYZMoeEZUy7Moy1DF4pMfRlRsn0tyNDu4/pub?output=csv";
+
+    // Mapeamento das colunas da sua Planilha (Ajuste o número do índice se a ordem for diferente)
+    // Exemplo: 0 é a primeira coluna (A), 1 é a segunda (B), etc.
+    const MAPA_COLUNAS = {
+      semana: 0,
+      audioVideo: 1,
+      palco: 2,
+      microfone1: 3,
+      microfone2: 4,
+      presidencia: 5,
+      leitor: 6,
+      indicadorInterno: 7,
+      indicadorExterno: 8
+    };
+
+    // Executa automaticamente ao abrir a página
+    window.onload = buscarDadosDaPlanilha;
+
+    async function buscarDadosDaPlanilha() {
+      const container = document.getElementById('cards-container');
+      container.innerHTML = '<div class="loading-msg">Carregando dados da planilha...</div>';
+
+      try {
+        const resposta = await fetch(CSV_URL);
+        if (!resposta.ok) throw new Error("Não foi possível acessar a planilha.");
+        
+        const textoCSV = await resposta.text();
+        const linhas = processarCSV(textoCSV);
+
+        // Limpa o container para colocar os novos cards
+        container.innerHTML = '';
+
+        // Ignora a primeira linha (cabeçalho) e itera pelas linhas de dados
+        for (let i = 1; i < linhas.length; i++) {
+          const col = linhas[i];
+          
+          // Pula linhas vazias
+          if (!col[MAPA_COLUNAS.semana]) continue;
+
+          // Extrai os dados com base no mapeamento configurado
+          const dadosCard = {
+            semana: col[MAPA_COLUNAS.semana] || "Nova Semana",
+            audioVideo: col[MAPA_COLUNAS.audioVideo] || "",
+            palco: col[MAPA_COLUNAS.palco] || "",
+            mic1: col[MAPA_COLUNAS.microfone1] || "",
+            mic2: col[MAPA_COLUNAS.microfone2] || "",
+            presidencia: col[MAPA_COLUNAS.presidencia] || "",
+            leitor: col[MAPA_COLUNAS.leitor] || "",
+            indInterno: col[MAPA_COLUNAS.indicadorInterno] || "",
+            indExterno: col[MAPA_COLUNAS.indicadorExterno] || ""
+          };
+
+          criarCardNaTela(dadosCard);
+        }
+
+      } catch (erro) {
+        console.error(erro);
+        container.innerHTML = `<div class="loading-msg" style="color: red;">Erro ao sincronizar dados: Verifique se a planilha está publicada como CSV na web.</div>`;
+      }
+    }
+
+    // Função auxiliar para criar a estrutura HTML idêntica à sua antiga
+    function criarCardNaTela(dados) {
+      const container = document.getElementById('cards-container');
+      const novoCard = document.createElement('div');
+      novoCard.className = 'card';
       
-      const corClasse = tipoCor === 'blue' ? 'theme-text-blue' : 'theme-text-red';
-      
-      novaSemana.innerHTML = `
-        <div class="item-row">
-          <div contenteditable="true"><strong>Orador:</strong> Novo Orador</div>
-          <div contenteditable="true"><strong>Data:</strong> 00 de Mês</div>
-        </div>
-        <div class="theme-container">
-          <div class="item-theme" contenteditable="true">
-            <strong>Tema:</strong> <span class="${corClasse}">Título do discurso aqui (00)</span>
+      novoCard.innerHTML = `
+        <button class="remove-card-btn no-print" onclick="this.closest('.card').remove()" title="Remover este card">✕</button>
+        <div class="card-title" contenteditable="true">${dados.semana}</div>
+        <div class="card-grid">
+          <div class="card-col">
+            <div class="assignment-row"><strong contenteditable="true">Áudio e Vídeo</strong><span class="colon">:</span><span class="brother-name" contenteditable="true">${dados.audioVideo}</span></div>
+            <div class="assignment-row space-below"><strong contenteditable="true">Palco</strong><span class="colon">:</span><span class="brother-name" contenteditable="true">${dados.palco}</span></div>
+            <div class="assignment-row"><strong contenteditable="true">Microfone</strong><span class="colon">:</span><span class="brother-name" contenteditable="true">${dados.mic1}</span></div>
+            <div class="assignment-row"><strong contenteditable="true">Microfone</strong><span class="colon">:</span><span class="brother-name" contenteditable="true">${dados.mic2}</span></div>
           </div>
-          <button class="remove-btn no-print" onclick="this.closest('.schedule-item').remove()" title="Remover semana">✕</button>
+          <div class="card-col">
+            <div class="assignment-row"><strong contenteditable="true">Presidência</strong><span class="colon">:</span><span class="brother-name" contenteditable="true">${dados.presidencia}</span></div>
+            <div class="assignment-row space-below"><strong contenteditable="true">Leitor A Sentinela</strong><span class="colon">:</span><span class="brother-name" contenteditable="true">${dados.leitor}</span></div>
+            <div class="assignment-row"><strong contenteditable="true">Indicador Interno</strong><span class="colon">:</span><span class="brother-name" contenteditable="true">${dados.indInterno}</span></div>
+            <div class="assignment-row"><strong contenteditable="true">Indicador Externo</strong><span class="colon">:</span><span class="brother-name" contenteditable="true">${dados.indExterno}</span></div>
+          </div>
         </div>
       `;
       
-      container.appendChild(novaSemana);
+      container.appendChild(novoCard);
+    }
+
+    // Função simples para tratar a quebra de linhas e vírgulas do CSV do Google
+    function processarCSV(texto) {
+      const linhas = texto.split(/\r?\n/);
+      return lines.map(linha => {
+        // Divide lidando de forma básica com aspas criadas pelo CSV
+        return linha.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(celula => 
+          celula.replace(/^"|"$/g, '').trim()
+        );
+      });
+    }
+
+    // Mantém a sua função manual viva caso queira usar em emergências
+    function adicionarNovaSemana() {
+      if(document.getElementById('cards-container').children.length >= 6) {
+        alert("O limite sugerido para a folha A4 vertical é de até 6 cards para manter a leitura nítida.");
+      }
+      criarCardNaTela({
+        semana: "Nova Semana (Clique para Editar)", audioVideo: "Nome", palco: "Nome", mic1: "Nome", mic2: "Nome", presidencia: "Nome", leitor: "Nome", indInterno: "Nome", indExterno: "Nome"
+      });
     }
   </script>
 
