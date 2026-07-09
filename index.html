@@ -245,8 +245,7 @@
     // URL do CSV da sua planilha pública do Google Drive
     const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSBuS_Qe2LkVH7QEPbSvoFn50e7I71Waljbuk8b2UR1wxGkYZMoeEZUy7Moy1DF4pMfRlRsn0tyNDu4/pub?output=csv";
 
-    // Mapeamento das colunas da sua Planilha (Ajuste o número do índice se a ordem for diferente)
-    // Exemplo: 0 é a primeira coluna (A), 1 é a segunda (B), etc.
+    // Mapeamento das colunas da sua Planilha
     const MAPA_COLUNAS = {
       semana: 0,
       audioVideo: 1,
@@ -268,7 +267,7 @@
 
       try {
         const resposta = await fetch(CSV_URL);
-        if (!resposta.ok) throw new Error("Não foi possível acessar a planilha.");
+        if (!resposta.ok) throw new Error("O Google retornou um status de erro: " + resposta.status);
         
         const textoCSV = await resposta.text();
         const linhas = processarCSV(textoCSV);
@@ -276,14 +275,20 @@
         // Limpa o container para colocar os novos cards
         container.innerHTML = '';
 
+        // Se a planilha estiver vazia ou mal estruturada
+        if (linhas.length <= 1) {
+          container.innerHTML = '<div class="loading-msg">Nenhum dado encontrado na planilha.</div>';
+          return;
+        }
+
         // Ignora a primeira linha (cabeçalho) e itera pelas linhas de dados
         for (let i = 1; i < linhas.length; i++) {
           const col = linhas[i];
           
-          // Pula linhas vazias
-          if (!col[MAPA_COLUNAS.semana]) continue;
+          // Pula se a linha inteira for inválida ou sem a coluna da semana
+          if (!col || col.length === 0 || !col[MAPA_COLUNAS.semana]) continue;
 
-          // Extrai os dados com base no mapeamento configurado
+          // Extrai os dados com base no mapeamento configurado de forma segura
           const dadosCard = {
             semana: col[MAPA_COLUNAS.semana] || "Nova Semana",
             audioVideo: col[MAPA_COLUNAS.audioVideo] || "",
@@ -300,12 +305,37 @@
         }
 
       } catch (erro) {
-        console.error(erro);
-        container.innerHTML = `<div class="loading-msg" style="color: red;">Erro ao sincronizar dados: Verifique se a planilha está publicada como CSV na web.</div>`;
+        console.error("Erro detalhado:", erro);
+        // Renderiza o erro real diretamente na tela para sabermos o culpado exato
+        container.innerHTML = `
+          <div class="loading-msg" style="color: red; text-align: left; max-width: 600px; margin: 20px auto; font-size: 16px; line-height: 1.5;">
+            <strong>⚠️ Falha Crítica na Sincronização</strong><br><br>
+            <strong>Detalhes do erro capturado:</strong><br>
+            <code style="background: #fee2e2; padding: 4px 8px; border-radius: 4px; font-family: monospace; display: block; margin: 8px 0; word-break: break-all;">${erro.name}: ${erro.message}</code>
+            <p style="font-size: 14px; color: #555;">Suba essa alteração para o GitHub. Se a mensagem acima disser <em>"TypeError: Failed to fetch"</em>, o seu navegador atual está impedindo o GitHub de ler o Google (CORS/Privacidade). Se disser outra coisa, o texto da caixinha nos dará a resposta exata!</p>
+          </div>
+        `;
       }
     }
 
-    // Função auxiliar para criar a estrutura HTML idêntica à sua antiga
+    // Função inteligente: Trata quebra de linhas e detecta automaticamente o divisor do CSV (, ou ;)
+    function processarCSV(texto) {
+      const linhas = texto.split(/\r?\n/);
+      
+      // Detecta se a planilha usa vírgula ou ponto e vírgula baseado na primeira linha
+      const primeiraLinha = linhas[0] || "";
+      const divisor = (primeiraLinha.split(';').length > primeiraLinha.split(',').length) ? ';' : ',';
+
+      return linhas.map(linha => {
+        // Expressão regular dinâmica baseada no divisor detectado
+        const regex = new RegExp(`${divisor}(?=(?:(?:[^"]*"){2})*[^"]*$)`);
+        return linha.split(regex).map(celula => 
+          celula ? celula.replace(/^"|"$/g, '').trim() : ""
+        );
+      });
+    }
+
+    // Função auxiliar para criar a estrutura HTML
     function criarCardNaTela(dados) {
       const container = document.getElementById('cards-container');
       const novoCard = document.createElement('div');
@@ -333,18 +363,7 @@
       container.appendChild(novoCard);
     }
 
-    // Função simples para tratar a quebra de linhas e vírgulas do CSV do Google
-    function processarCSV(texto) {
-      const linhas = texto.split(/\r?\n/);
-      return lines.map(linha => {
-        // Divide lidando de forma básica com aspas criadas pelo CSV
-        return linha.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(celula => 
-          celula.replace(/^"|"$/g, '').trim()
-        );
-      });
-    }
-
-    // Mantém a sua função manual viva caso queira usar em emergências
+    // Mantém a função manual ativa para emergências
     function adicionarNovaSemana() {
       if(document.getElementById('cards-container').children.length >= 6) {
         alert("O limite sugerido para a folha A4 vertical é de até 6 cards para manter a leitura nítida.");
