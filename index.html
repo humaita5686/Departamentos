@@ -32,10 +32,11 @@
       border-radius: 8px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.15);
       display: flex;
-      gap: 10px;
+      align-items: center;
+      gap: 20px;
     }
-    .add-card-btn, .sync-btn {
-      background-color: #85581A;
+    .sync-btn {
+      background-color: #2563eb;
       color: white;
       border: none;
       padding: 8px 16px;
@@ -46,14 +47,30 @@
       font-weight: 600;
       transition: background 0.2s;
     }
-    .add-card-btn:hover, .sync-btn:hover {
-      background-color: #634113;
-    }
-    .sync-btn {
-      background-color: #2563eb;
-    }
     .sync-btn:hover {
       background-color: #1d4ed8;
+    }
+
+    /* Estilização do seletor de semanas */
+    .seletor-container {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #3d2411;
+    }
+    .seletor-semana {
+      font-family: 'Cabin', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 6px;
+      border: 1px solid #85581A;
+      color: #3d2411;
+      background-color: white;
+      cursor: pointer;
+      outline: none;
     }
 
     /* Dimensões rígidas da folha A4 */
@@ -225,7 +242,14 @@
   <!-- Barra superior para controle em tela -->
   <div class="control-bar no-print">
     <button class="sync-btn" onclick="buscarDadosDaPlanilha()">🔄 Atualizar Planilha</button>
-    <button class="add-card-btn" onclick="adicionarNovaSemana()">+ Adicionar Card Manual</button>
+    
+    <!-- Novo Seletor Interativo de Semana Inicial -->
+    <div class="seletor-container">
+      <span>📅 Mostrar a partir da:</span>
+      <select id="semana-select" class="seletor-semana" onchange="mudarSemanaInicial()">
+        <option value="">Carregando semanas...</option>
+      </select>
+    </div>
   </div>
 
   <div class="a4-page">
@@ -258,61 +282,52 @@
       indicadorExterno: 6
     };
 
+    // Memória global para guardar as linhas limpas da planilha
+    let todasAsLinhasValidas = [];
+
     // Executa automaticamente ao abrir a página
     window.onload = buscarDadosDaPlanilha;
 
     async function buscarDadosDaPlanilha() {
       const container = document.getElementById('cards-container');
+      const seletor = document.getElementById('semana-select');
       container.innerHTML = '<div class="loading-msg">Carregando dados da planilha...</div>';
+      seletor.innerHTML = '<option value="">Carregando semanas...</option>';
 
       try {
         const resposta = await fetch(CSV_URL);
         if (!resposta.ok) throw new Error("O Google retornou um status de erro: " + resposta.status);
         
         const textoCSV = await resposta.text();
-        const linhas = processarCSV(textoCSV);
+        const linhasRaw = processarCSV(textoCSV);
 
-        // Limpa o container para colocar os novos cards
-        container.innerHTML = '';
+        // Limpa a memória global
+        todasAsLinhasValidas = [];
 
-        if (linhas.length <= 1) {
+        if (linhasRaw.length <= 1) {
           container.innerHTML = '<div class="loading-msg">Nenhum dado encontrado na planilha.</div>';
           return;
         }
 
-        // Contador para limitar a exibição em no máximo 4 cards
-        let cardsExibidos = 0;
-
-        // Ignora a primeira linha (cabeçalho) e itera pelas linhas de dados
-        for (let i = 1; i < linhas.length; i++) {
-          const col = linhas[i];
-          
-          // Pula se a linha inteira for inválida ou sem a coluna da semana
-          if (!col || col.length === 0 || !col[MAPA_COLUNAS.semana]) continue;
-
-          // Se já renderizou 4 cards, interrompe o loop completamente
-          if (cardsExibidos >= 4) {
-            break;
+        // Filtra e armazena apenas linhas que possuem uma semana válida informada
+        for (let i = 1; i < linhasRaw.length; i++) {
+          const col = linhasRaw[i];
+          if (col && col.length > 0 && col[MAPA_COLUNAS.semana]) {
+            todasAsLinhasValidas.push(col);
           }
-
-          // Extrai os dados com base no mapeamento configurado de forma segura
-          const dadosCard = {
-            semana: col[MAPA_COLUNAS.semana] || "00/00 a 00/00",
-            audioVideo: col[MAPA_COLUNAS.audioVideo] || "",
-            palco: col[MAPA_COLUNAS.palco] || "",
-            mic1: col[MAPA_COLUNAS.microfone1] || "",
-            mic2: col[MAPA_COLUNAS.microfone2] || "",
-            presidencia: col[MAPA_COLUNAS.presidencia] || "",
-            leitor: col[MAPA_COLUNAS.leitor] || "",
-            indInterno: col[MAPA_COLUNAS.indicadorInterno] || "",
-            indExterno: col[MAPA_COLUNAS.indicadorExterno] || ""
-          };
-
-          criarCardNaTela(dadosCard);
-          
-          // Incrementa o contador de cards gerados com sucesso
-          cardsExibidos++;
         }
+
+        // Alimenta o componente select com as semanas disponíveis
+        seletor.innerHTML = '';
+        todasAsLinhasValidas.forEach((col, index) => {
+          const opcao = document.createElement('option');
+          opcao.value = index;
+          opcao.textContent = "Semana: " + col[MAPA_COLUNAS.semana];
+          seletor.appendChild(opcao);
+        });
+
+        // Por padrão, renderiza as 4 primeiras semanas encontradas (começando do índice 0)
+        renderizarCardsIniciandoEm(0);
 
       } catch (erro) {
         console.error("Erro detalhado:", erro);
@@ -326,9 +341,53 @@
       }
     }
 
+    // Função responsável por monitorar a troca no menu de seleção
+    function mudarSemanaInicial() {
+      const seletor = document.getElementById('semana-select');
+      const indiceEscolhido = parseInt(seletor.value, 10) || 0;
+      renderizarCardsIniciandoEm(indiceEscolhido);
+    }
+
+    // Função que renderiza estritamente até 4 cards a partir do ponto escolhido
+    function renderizarCardsIniciandoEm(indiceInicial) {
+      const container = document.getElementById('cards-container');
+      container.innerHTML = '';
+
+      if (todasAsLinhasValidas.length === 0) {
+        container.innerHTML = '<div class="loading-msg">Nenhuma linha válida para exibir.</div>';
+        return;
+      }
+
+      let cardsExibidos = 0;
+
+      for (let i = indiceInicial; i < todasAsLinhasValidas.length; i++) {
+        // Trava rígida de segurança: Garante no máximo 4 cards na folha
+        if (cardsExibidos >= 4) {
+          break;
+        }
+
+        const col = todasAsLinhasValidas[i];
+
+        const dadosCard = {
+          semana: col[MAPA_COLUNAS.semana] || "00/00 a 00/00",
+          audioVideo: col[MAPA_COLUNAS.audioVideo] || "",
+          palco: col[MAPA_COLUNAS.palco] || "",
+          mic1: col[MAPA_COLUNAS.microfone1] || "",
+          mic2: col[MAPA_COLUNAS.microfone2] || "",
+          presidencia: col[MAPA_COLUNAS.presidencia] || "",
+          leitor: col[MAPA_COLUNAS.leitor] || "",
+          indInterno: col[MAPA_COLUNAS.indicadorInterno] || "",
+          indExterno: col[MAPA_COLUNAS.indicadorExterno] || ""
+        };
+
+        criarCardNaTela(dadosCard);
+        cardsExibidos++;
+      }
+    }
+
     // Função inteligente: Trata quebra de linhas e detecta automaticamente o divisor do CSV (, ou ;)
     function processarCSV(texto) {
-      const linhas = text = texto.split(/\r?\n/);
+      const linhas = texto.split(/\r?\n/);
       
       const primeiraLinha = linhas[0] || "";
       const divisor = (primeiraLinha.split(';').length > primeiraLinha.split(',').length) ? ';' : ',';
@@ -347,7 +406,6 @@
       const novoCard = document.createElement('div');
       novoCard.className = 'card';
       
-      // ADICIONADO "Semana:" antes de exibir o valor da data
       novoCard.innerHTML = `
         <button class="remove-card-btn no-print" onclick="this.closest('.card').remove()" title="Remover este card">✕</button>
         <div class="card-title" contenteditable="true">Semana ${dados.semana}</div>
@@ -368,16 +426,6 @@
       `;
       
       container.appendChild(novoCard);
-    }
-
-    // Mantém a função manual ativa para emergências
-    function adicionarNovaSemana() {
-      if(document.getElementById('cards-container').children.length >= 6) {
-        alert("O limite sugerido para a folha A4 vertical é de até 6 cards para manter a leitura nítida.");
-      }
-      criarCardNaTela({
-        semana: "00/00 a 00/00", audioVideo: "Nome", palco: "Nome", mic1: "Nome", mic2: "Nome", presidencia: "Nome", leitor: "Nome", indInterno: "Nome", indExterno: "Nome"
-      });
     }
   </script>
 
