@@ -184,7 +184,7 @@
     }
 
     .space-below {
-      margin-bottom: 0px; /* Desativado no mobile para manter coesão */
+      margin-bottom: 0px;
     }
 
     .remove-card-btn {
@@ -340,7 +340,8 @@
           return;
         }
 
-        for (let i = 1; i < linesRaw = linhasRaw.length; i++) {
+        // CORREÇÃO AQUI: Mudado de "linesRaw = linhasRaw.length" para "linhasRaw.length"
+        for (let i = 1; i < linhasRaw.length; i++) {
           const col = linhasRaw[i];
           if (col && col.length > 0 && col[MAPA_COLUNAS.semana]) {
             todasAsLinhasValidas.push(col);
